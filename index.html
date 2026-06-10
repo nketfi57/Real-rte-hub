@@ -292,7 +292,7 @@
             const email = document.getElementById('email-input').value.trim();
             if(!email) return createToast("Indiquez votre mail pro.", "error");
             try {
-                await sendSignInLinkToEmail(auth, email, { url: window.location.href, handleCodeInApp: true });
+                await sendSignInLinkToEmail(auth, email, { url: "https://nketfi57.github.io/Real-rte-hub/", handleCodeInApp: true });
                 window.localStorage.setItem('emailForSignIn', email);
                 if(!isLoginTab) window.localStorage.setItem('nameForSignIn', document.getElementById('name-input').value.trim());
                 playSound('success');
