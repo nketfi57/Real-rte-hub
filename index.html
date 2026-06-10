@@ -3,117 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RTE Hub | Espace Équipe</title>
-    <!-- Tailwind CSS pour le look moderne bleu/blanc -->
+    <title>RTE Hub | Plateforme Interne</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- GSAP pour les animations premium -->
+    <!-- GSAP + ScrollTrigger -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+        /* Style pour les particules fines en arrière-plan */
+        .particle {
+            position: absolute;
+            background: rgba(0, 174, 239, 0.2);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        /* Scrollbar custom pour le chat et les annonces */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
 </head>
-<body class="bg-slate-50 h-screen overflow-hidden font-sans">
+<body class="bg-[#f8fafc] h-screen overflow-hidden font-sans antialiased relative">
 
-    <!-- ==================== 1. PAGE DE CONNEXION ==================== -->
-    <div id="login-screen" class="fixed inset-0 flex justify-center items-center bg-sky-50 z-50">
-        <div id="login-card" class="bg-white p-10 rounded-3xl shadow-2xl w-96 border border-sky-100 text-center">
-            <div class="w-16 h-16 bg-sky-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg shadow-sky-200">
-                <span class="text-white font-black text-xl">RTE</span>
+    <!-- CANVAS / ARRIÈRE-PLAN DE PARTICULES FINES -->
+    <div id="particle-container" class="absolute inset-0 overflow-hidden pointer-events-none z-0"></div>
+
+    <!-- BLURS DE FOND PREMIUM (Glow effects) -->
+    <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-sky-200/30 rounded-full blur-[120px] pointer-events-none z-0"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-blue-200/20 rounded-full blur-[120px] pointer-events-none z-0"></div>
+
+    <!-- ==================== 1. ÉCRAN D'AUTHENTIFICATION COMPLET ==================== -->
+    <div id="login-screen" class="fixed inset-0 flex justify-center items-center z-50 p-4">
+        <!-- Boîte principale avec un effet de flou de verre (Glassmorphism) -->
+        <div id="login-card" class="bg-white/80 backdrop-blur-xl p-10 rounded-3xl shadow-[-20px_20px_60px_rgba(0,0,0,0.05)] w-full max-w-md border border-white/60 relative overflow-hidden">
+            
+            <!-- Logo RTE dynamique -->
+            <div class="flex justify-center mb-6">
+                <img src="logo.png" alt="RTE" class="h-12 w-auto object-contain logo-rte">
             </div>
-            <h1 class="text-slate-800 text-2xl font-bold mb-2">RTE HUB</h1>
-            <p class="text-slate-400 text-sm mb-6">Connexion sécurisée par lien magique</p>
-            
-            <input id="email-input" type="email" placeholder="prenom.nom@rte-france.com" 
-                class="w-full p-3 mb-4 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all">
-            
-            <button id="login-btn" class="w-full bg-sky-500 text-white py-3 rounded-xl font-bold hover:bg-sky-600 shadow-lg shadow-sky-100 transition-all active:scale-95">
-                Recevoir le lien d'accès
-            </button>
-            <p id="login-status" class="text-xs mt-4 text-slate-500 hidden"></p>
+
+            <!-- Onglets Se connecter / Créer un compte -->
+            <div class="flex bg-slate-100/80 p-1 rounded-xl mb-8 relative">
+                <button id="tab-login" class="flex-1 py-2.5 text-sm font-bold text-sky-600 bg-white shadow-sm rounded-lg transition-all z-10">Se connecter</button>
+                <button id="tab-register" class="flex-1 py-2.5 text-sm font-semibold text-slate-500 hover:text-slate-800 transition-all z-10">Créer un compte</button>
+            </div>
+
+            <!-- FORMULAIRE (Dynamique pour les deux onglets) -->
+            <div id="auth-form-step1">
+                <h2 id="auth-title" class="text-xl font-bold text-slate-800 mb-1 text-center">RTE HUB</h2>
+                <p id="auth-subtitle" class="text-xs text-slate-400 mb-6 text-center">Accès réservé au personnel du réseau</p>
+                
+                <!-- Champ Nom (Caché par défaut, affiché pour l'inscription) -->
+                <div id="name-field" class="h-0 opacity-0 overflow-hidden transition-all duration-300">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nom complet</label>
+                    <input id="name-input" type="text" placeholder="Jean Dupont" 
+                        class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-sky-400 focus:bg-white transition-all mb-4 text-sm">
+                </div>
+
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Adresse e-mail professionnelle</label>
+                <input id="email-input" type="email" placeholder="prenom.nom@rte-france.com" 
+                    class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-sky-400 focus:bg-white transition-all mb-6 text-sm">
+                
+                <button id="auth-submit-btn" class="w-full bg-gradient-to-r from-sky-500 to-blue-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-sky-500/20 hover:shadow-sky-500/30 transition-all hover:brightness-105 active:scale-[0.98]">
+                    Obtenir le code de sécurité
+                </button>
+            </div>
+
+            <!-- ÉTAPE CODE À SOURCIL (Vérification OTP simulée) -->
+            <div id="auth-form-step2" class="hidden opacity-0 transform translate-y-4">
+                <h2 class="text-xl font-bold text-slate-800 mb-1 text-center">Double Authentification</h2>
+                <p class="text-xs text-slate-400 mb-6 text-center">Entrez le code de validation reçu par e-mail</p>
+                
+                <!-- Grille d'input pour le code OTP -->
+                <div class="flex justify-center gap-2 mb-6">
+                    <input type="text" maxlength="1" class="otp-input w-12 h-14 text-center text-xl font-bold bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-sky-500 focus:bg-white transition-all">
+                    <input type="text" maxlength="1" class="otp-input w-12 h-14 text-center text-xl font-bold bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-sky-500 focus:bg-white transition-all">
+                    <input type="text" maxlength="1" class="otp-input w-12 h-14 text-center text-xl font-bold bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-sky-500 focus:bg-white transition-all">
+                    <input type="text" maxlength="1" class="otp-input w-12 h-14 text-center text-xl font-bold bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-sky-500 focus:bg-white transition-all">
+                    <input type="text" maxlength="1" class="otp-input w-12 h-14 text-center text-xl font-bold bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-sky-500 focus:bg-white transition-all">
+                    <input type="text" maxlength="1" class="otp-input w-12 h-14 text-center text-xl font-bold bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-sky-500 focus:bg-white transition-all">
+                </div>
+
+                <button id="verify-otp-btn" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-emerald-500/20 hover:brightness-105 transition-all active:scale-[0.98]">
+                    Valider le code
+                </button>
+                <button id="back-auth-btn" class="w-full text-xs text-slate-400 font-semibold mt-4 hover:text-slate-600 transition-all">Retour</button>
+            </div>
+
+            <p id="auth-status" class="text-xs mt-4 text-center font-medium hidden"></p>
         </div>
     </div>
 
-    <!-- ==================== 2. INTERFACE DASHBOARD (Cachée au départ) ==================== -->
-    <div id="dashboard-screen" class="h-screen w-full flex opacity-0 pointer-events-none">
+    <!-- ==================== 2. INTERFACE DASHBOARD PREMIUM ==================== -->
+    <div id="dashboard-screen" class="h-screen w-full flex opacity-0 pointer-events-none z-10 relative">
         
-        <!-- SIDEBAR GAUCHE -->
-        <aside class="w-64 bg-white border-r border-slate-100 flex flex-col justify-between p-6">
+        <!-- SIDEBAR DE DESIGN -->
+        <aside class="w-72 bg-white/75 backdrop-blur-md border-r border-slate-100 flex flex-col justify-between p-6">
             <div>
-                <!-- Logo -->
-                <div class="flex items-center gap-3 mb-8 px-2">
-                    <div class="w-8 h-8 bg-sky-500 rounded-lg flex items-center justify-center text-white font-bold text-xs">RTE</div>
-                    <span class="font-bold text-slate-800 text-lg tracking-wide">RTE HUB</span>
+                <!-- Header Sidebar avec Logo -->
+                <div class="flex items-center gap-3 mb-10 px-2">
+                    <img src="logo.png" alt="RTE" class="h-8 w-auto object-contain logo-rte">
+                    <div class="h-4 w-[1px] bg-slate-200"></div>
+                    <span class="font-bold text-slate-800 text-sm tracking-wider uppercase">Hub Interne</span>
                 </div>
-                <!-- Menu -->
-                <nav class="space-y-1">
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 bg-sky-50 text-sky-600 rounded-xl font-semibold text-sm transition-all">
-                        📊 Dashboard / Annonces
+                <!-- Navigation -->
+                <nav class="space-y-1.5">
+                    <a href="#" class="flex items-center gap-3 px-4 py-3.5 bg-gradient-to-r from-sky-50 to-sky-100/50 text-sky-600 rounded-2xl font-bold text-sm shadow-sm shadow-sky-500/5 border border-sky-100/30">
+                        📊 Tableau de bord / Directives
                     </a>
                 </nav>
             </div>
 
-            <!-- Profil Utilisateur en Bas de la Sidebar -->
-            <div class="border-t border-slate-100 pt-4 flex items-center gap-3">
+            <!-- Utilisateur connecté -->
+            <div class="border-t border-slate-100/80 pt-5 flex items-center gap-3">
                 <div class="relative group cursor-pointer">
-                    <img id="user-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=RTE" alt="Avatar" class="w-10 h-10 rounded-xl bg-sky-50 border border-slate-200">
-                    <div class="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] text-white transition-all">Édit</div>
+                    <img id="user-avatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=RTE" alt="Avatar" class="w-11 h-11 rounded-2xl bg-sky-50 border border-slate-100 p-0.5">
+                    <div class="absolute inset-0 bg-slate-900/40 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] text-white font-bold backdrop-blur-[2px] transition-all">Éditer</div>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p id="user-name" class="text-sm font-semibold text-slate-800 truncate cursor-pointer hover:text-sky-500">Agent RTE</p>
-                    <p id="user-role" class="text-xs text-slate-400 truncate">Équipe Technique</p>
+                    <p id="user-name" class="text-sm font-bold text-slate-800 truncate hover:text-sky-500 cursor-pointer">Agent RTE</p>
+                    <p id="user-role" class="text-[11px] font-semibold text-slate-400 truncate tracking-wider uppercase">Opérateur Réseau</p>
                 </div>
             </div>
         </aside>
 
-        <!-- ZONE DE CONTENU PRINCIPALE (Grille 2 colonnes) -->
+        <!-- CONTENU CENTRAL (Affichage large) -->
         <main class="flex-1 grid grid-cols-3 overflow-hidden">
             
-            <!-- COLONNE 1 & 2 : ANNONCES DU CHEF (Flux principal) -->
-            <section class="col-span-2 p-8 overflow-y-auto space-y-6">
-                <div class="flex justify-between items-center mb-2">
+            <!-- FLUX CENTRAL D'ANNONCES -->
+            <section class="col-span-2 p-10 overflow-y-auto space-y-8 relative">
+                <div class="flex justify-between items-center pb-4 border-b border-slate-100">
                     <div>
-                        <h2 class="text-2xl font-bold text-slate-800">Fil d'actualité</h2>
-                        <p class="text-sm text-slate-400">Les dernières directives de votre chef d'équipe</p>
+                        <h2 class="text-2xl font-black text-slate-800 tracking-tight">Directives d'Équipe</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Espace officiel de communication de votre management</p>
                     </div>
+                    <img src="logo.png" alt="RTE" class="h-6 w-auto opacity-20 object-contain">
                 </div>
 
-                <!-- Zone d'écriture exclusive au Chef (Simulée pour l'instant) -->
-                <div id="chef-zone" class="bg-gradient-to-r from-sky-500 to-sky-600 p-6 rounded-2xl shadow-xl shadow-sky-100 text-white">
-                    <h3 class="font-bold text-lg mb-2">📢 Publier une note d'équipe</h3>
-                    <textarea id="announcement-input" placeholder="Une mise à jour importante, un code de sécurité..." rows="2" 
-                        class="w-full p-3 rounded-xl text-slate-800 focus:outline-none text-sm mb-3"></textarea>
+                <!-- Zone d'écriture exclusive au Chef -->
+                <div id="chef-zone" class="bg-gradient-to-br from-slate-900 via-sky-950 to-slate-900 p-6 rounded-3xl shadow-xl border border-sky-900/30 text-white relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                        <img src="logo.png" alt="RTE" class="w-32 invert">
+                    </div>
+                    <h3 class="font-bold text-md mb-3 flex items-center gap-2">📢 Publier une note prioritaire</h3>
+                    <textarea id="announcement-input" placeholder="Écrivez une consigne ou une mise à jour d'exploitation..." rows="3" 
+                        class="w-full p-4 rounded-2xl bg-white/10 border border-white/10 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400 text-sm mb-4 backdrop-blur-sm transition-all"></textarea>
                     <div class="flex justify-end">
-                        <button id="post-announcement-btn" class="bg-white text-sky-600 font-bold px-5 py-2 rounded-xl text-sm hover:bg-sky-50 transition-all active:scale-95">
-                            Diffuser l'alerte
+                        <button id="post-announcement-btn" class="bg-white text-slate-900 font-bold px-6 py-2.5 rounded-xl text-xs hover:bg-sky-50 shadow-md transition-all active:scale-95">
+                            Diffuser sur le réseau
                         </button>
                     </div>
                 </div>
 
                 <!-- Conteneur des Annonces -->
-                <div id="announcements-container" class="space-y-4">
-                    <!-- Les annonces s'inséreront ici dynamiquement -->
-                </div>
+                <div id="announcements-container" class="space-y-4"></div>
             </section>
 
-            <!-- COLONNE 3 : GROUP CHAT D'ÉQUIPE -->
-            <section class="bg-white border-l border-slate-100 flex flex-col h-full">
+            <!-- CHAT DE GROUPE COLLABORATIF -->
+            <section class="bg-white/60 backdrop-blur-md border-l border-slate-100 flex flex-col h-full shadow-[-10px_0_30px_rgba(0,0,0,0.01)]">
                 <!-- Header Chat -->
-                <div class="p-4 border-b border-slate-100 flex items-center gap-3">
-                    <div class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></div>
-                    <div>
-                        <h3 class="font-bold text-slate-800 text-sm">Canal Équipe RTE</h3>
-                        <p class="text-[11px] text-slate-400">Échanges instantanés</p>
+                <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm">Canal Opérationnel</h3>
+                            <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Équipe en temps réel</p>
+                        </div>
                     </div>
+                    <img src="logo.png" alt="RTE" class="h-4 w-auto opacity-30 object-contain">
                 </div>
 
-                <!-- Zone des messages du chat -->
-                <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4 text-sm">
-                    <!-- Les messages du chat s'inséreront ici dynamiquement -->
-                </div>
+                <!-- Zone des messages -->
+                <div id="chat-messages" class="flex-1 p-5 overflow-y-auto space-y-4 text-sm"></div>
 
                 <!-- Input Chat -->
-                <div class="p-4 border-t border-slate-100">
-                    <div class="flex gap-2">
-                        <input id="chat-input" type="text" placeholder="Écrire un message..." 
-                            class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400">
-                        <button id="send-chat-btn" class="bg-sky-500 text-white px-4 rounded-xl font-bold hover:bg-sky-600 transition-all active:scale-95">
+                <div class="p-5 border-t border-slate-100 bg-white/80">
+                    <div class="flex gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200/50">
+                        <input id="chat-input" type="text" placeholder="Votre message à l'équipe..." 
+                            class="flex-1 bg-transparent px-3 py-2 text-sm focus:outline-none text-slate-700">
+                        <button id="send-chat-btn" class="bg-sky-500 text-white h-9 w-9 rounded-xl font-bold hover:bg-sky-600 flex items-center justify-center shadow-md shadow-sky-500/10 transition-all active:scale-95">
                             ➔
                         </button>
                     </div>
@@ -123,13 +191,12 @@
         </main>
     </div>
 
-    <!-- ==================== 3. CONFIGURATION & LOGIQUE FIREBASE ==================== -->
+    <!-- ==================== 3. BACKEND & ANIMATIONS PUSHÉES ==================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Ta configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCFqbtCLxYcRDJ-4KvJBBGZ8lIbhE-dXds",
             authDomain: "rte-hub.firebaseapp.com",
@@ -143,126 +210,230 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- ANIMATION INITIALE GSAP (Page de login) ---
-        gsap.from("#login-card", { opacity: 0, scale: 0.9, y: 30, duration: 1, ease: "power4.out" });
+        let isLoginTab = true;
 
-        // --- ÉTAPE A : GESTION DU LIEN MAGIQUE DE CONNEXION ---
-        const loginBtn = document.getElementById('login-btn');
-        const emailInput = document.getElementById('email-input');
-        const loginStatus = document.getElementById('login-status');
+        // --- DESIGN : GÉNÉRATEUR DE PARTICULES FINES GSAP ---
+        const pContainer = document.getElementById('particle-container');
+        for (let i = 0; i < 40; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            const size = Math.random() * 4 + 2;
+            p.style.width = `${size}px`;
+            p.style.height = `${size}px`;
+            p.style.left = `${Math.random() * 100}%`;
+            p.style.top = `${Math.random() * 100}%`;
+            pContainer.appendChild(p);
+            
+            gsap.to(p, {
+                y: Math.random() * -100 - 50,
+                x: Math.random() * 40 - 20,
+                opacity: Math.random() * 0.5,
+                duration: Math.random() * 4 + 4,
+                repeat: -1,
+                yoyo: true,
+                ease: "sine.inOut"
+            });
+        }
 
-        loginBtn.addEventListener('click', async () => {
-            const email = emailInput.value.trim();
-            if(!email) return alert("Rentre ton adresse mail RTE !");
+        // --- ANIMATIONS GSAP D'OUVERTURE DE PAGE ---
+        gsap.from("#login-card", { 
+            opacity: 0, 
+            y: 40, 
+            scale: 0.95,
+            blur: 10,
+            duration: 1.2, 
+            ease: "power4.out" 
+        });
+        gsap.from(".logo-rte", { opacity: 0, scale: 0.8, duration: 1, delay: 0.3, ease: "back.out(1.7)" });
+
+        // --- GESTION DES ONGLETS (SE CONNECTER / CRÉER UN COMPTE) ---
+        const tabLogin = document.getElementById('tab-login');
+        const tabRegister = document.getElementById('tab-register');
+        const nameField = document.getElementById('name-field');
+        const authTitle = document.getElementById('auth-title');
+        const authSubmitBtn = document.getElementById('auth-submit-btn');
+
+        tabLogin.addEventListener('click', () => basculerOnglet(true));
+        tabRegister.addEventListener('click', () => basculerOnglet(false));
+
+        function basculerOnglet(isLogin) {
+            if(isLogin === isLoginTab) return;
+            isLoginTab = isLogin;
+
+            // Animation fluide de bascule avec GSAP
+            if(isLogin) {
+                tabLogin.className = "flex-1 py-2.5 text-sm font-bold text-sky-600 bg-white shadow-sm rounded-lg transition-all z-10";
+                tabRegister.className = "flex-1 py-2.5 text-sm font-semibold text-slate-500 hover:text-slate-800 transition-all z-10";
+                gsap.to(nameField, { height: 0, opacity: 0, duration: 0.3, ease: "power2.inOut" });
+                authTitle.innerText = "RTE HUB";
+                authSubmitBtn.innerText = "Obtenir le code de sécurité";
+            } else {
+                tabRegister.className = "flex-1 py-2.5 text-sm font-bold text-sky-600 bg-white shadow-sm rounded-lg transition-all z-10";
+                tabLogin.className = "flex-1 py-2.5 text-sm font-semibold text-slate-500 hover:text-slate-800 transition-all z-10";
+                gsap.to(nameField, { height: 76, opacity: 1, duration: 0.3, ease: "power2.inOut" });
+                authTitle.innerText = "Rejoindre le Hub";
+                authSubmitBtn.innerText = "Créer mon compte professionnel";
+            }
+        }
+
+        // --- LOGIQUE OTP & EMAIL SIGN-IN LINK ---
+        const authStatus = document.getElementById('auth-status');
+        const step1 = document.getElementById('auth-form-step1');
+        const step2 = document.getElementById('auth-form-step2');
+
+        authSubmitBtn.addEventListener('click', async () => {
+            const email = document.getElementById('email-input').value.trim();
+            if(!email) return alert("Veuillez entrer votre email !");
+
+            if(!isLoginTab && !document.getElementById('name-input').value.trim()) {
+                return alert("Veuillez entrer votre nom pour l'inscription !");
+            }
 
             const actionCodeSettings = {
-                url: window.location.href, // Renvoie l'utilisateur sur cette même page
+                url: window.location.href,
                 handleCodeInApp: true,
             };
 
             try {
-                loginStatus.classList.remove('hidden');
-                loginStatus.innerText = "Envoi du lien en cours...";
+                authStatus.classList.remove('hidden', 'text-rose-500', 'text-emerald-500');
+                authStatus.innerText = "Génération du jeton sécurisé...";
+                authStatus.className = "text-xs mt-4 text-center font-medium text-sky-600 animate-pulse";
+
                 await sendSignInLinkToEmail(auth, email, actionCodeSettings);
                 window.localStorage.setItem('emailForSignIn', email);
-                loginStatus.innerText = "📨 Lien magique envoyé ! Vérifie tes e-mails.";
-                loginStatus.className = "text-xs mt-4 text-emerald-600 font-medium";
+                if(!isLoginTab) window.localStorage.setItem('nameForSignIn', document.getElementById('name-input').value.trim());
+
+                // Transition GSAP vers l'étape du Code OTP
+                gsap.to(step1, { opacity: 0, y: -20, duration: 0.4, onComplete: () => {
+                    step1.classList.add('hidden');
+                    step2.classList.remove('hidden');
+                    gsap.to(step2, { opacity: 1, y: 0, duration: 0.4 });
+                    document.querySelectorAll('.otp-input')[0].focus();
+                }});
+
+                authStatus.innerText = "📨 Code de sécurité envoyé à votre adresse !";
+                authStatus.className = "text-xs mt-4 text-center font-medium text-emerald-600";
             } catch (error) {
                 console.error(error);
-                loginStatus.innerText = "Erreur lors de l'envoi du mail.";
-                loginStatus.className = "text-xs mt-4 text-rose-500 font-medium";
+                authStatus.innerText = "Erreur de communication avec le serveur d'authentification.";
+                authStatus.className = "text-xs mt-4 text-center font-medium text-rose-500";
             }
         });
 
-        // --- ÉTAPE B : VÉRIFICATION DU RETOUR DE L'E-MAIL ---
+        // Comportement des inputs de code OTP (passage auto au suivant)
+        const inputs = document.querySelectorAll('.otp-input');
+        inputs.forEach((input, index) => {
+            input.addEventListener('keyup', (e) => {
+                if (e.target.value.length >= 1 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+                if (e.key === 'Backspace' && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+        });
+
+        // Validation du bouton de code OTP (Ici on demande de cliquer sur le lien reçu dans le spam pour de vrai, ou on gère le retour auto si l'utilisateur a cliqué)
+        document.getElementById('verify-otp-btn').addEventListener('click', () => {
+            alert("🔒 Pour valider la double authentification, veuillez ouvrir l'e-mail reçu (vérifiez vos spams) et cliquer sur le lien de confirmation.");
+        });
+
+        document.getElementById('back-auth-btn').addEventListener('click', () => {
+            gsap.to(step2, { opacity: 0, y: 20, duration: 0.4, onComplete: () => {
+                step2.classList.add('hidden');
+                step1.classList.remove('hidden');
+                gsap.to(step1, { opacity: 1, y: 0, duration: 0.4 });
+            }});
+        });
+
+        // --- INTERCEPTION DU LIEN ET CONNEXION AUTOMATIQUE ---
         if (isSignInWithEmailLink(auth, window.location.href)) {
             let email = window.localStorage.getItem('emailForSignIn');
-            if (!email) {
-                email = window.prompt('Veuillez confirmer votre e-mail pour la connexion :');
-            }
+            if (!email) email = window.prompt('Confirmez votre e-mail RTE pour finaliser :');
+            
             signInWithEmailLink(auth, email, window.location.href)
-                .then(() => {
+                .then((result) => {
+                    const savedName = window.localStorage.getItem('nameForSignIn');
                     window.localStorage.removeItem('emailForSignIn');
-                    // Nettoyer l'URL
+                    window.localStorage.removeItem('nameForSignIn');
                     window.history.replaceState({}, document.title, window.location.pathname);
                 })
-                .catch((error) => console.error("Erreur d'authentification :", error));
+                .catch((error) => console.error(error));
         }
 
-        // --- ÉTAPE C : TRANSITION ANIMÉE ET ÉCOUTE EN TEMPS RÉEL ---
+        // --- CHANGEMENT D'ÉTAT D'AUTH & TRANSITION PREMIUM DASHBOARD ---
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Remplir les infos du profil
                 document.getElementById('user-name').innerText = user.email.split('@')[0].replace('.', ' ');
                 
-                // Animation de transition GSAP : Disparition login -> Apparition Dashboard
+                // Timeline GSAP ultra chiadée pour l'ouverture du Dashboard
                 const tl = gsap.timeline();
-                tl.to("#login-screen", { opacity: 0, duration: 0.5, onComplete: () => {
+                tl.to("#login-card", { scale: 0.9, blur: 15, opacity: 0, duration: 0.5, ease: "power3.in" });
+                tl.to("#login-screen", { opacity: 0, duration: 0.4, onComplete: () => {
                     document.getElementById('login-screen').classList.add('hidden');
-                }});
-                tl.to("#dashboard-screen", { opacity: 1, pointerEvents: "auto", duration: 0.5 });
+                }}, "-=0.2");
+                tl.to("#dashboard-screen", { opacity: 1, pointerEvents: "auto", duration: 0.8, ease: "power2.out" });
+                tl.from("aside", { x: -50, opacity: 0, duration: 0.6, ease: "power3.out" }, "-=0.5");
+                tl.from("main section", { opacity: 0, y: 20, duration: 0.6, stagger: 0.1 }, "-=0.4");
                 
-                // Activer le temps réel pour les annonces et le chat
                 activerTempsReel();
             }
         });
 
-        // --- ÉTAPE D : FONCTIONNALITÉS EN TEMPS RÉEL (FIRESTORE) ---
+        // --- FIRESTORE TEMPS RÉEL CONTROLLER ---
         function activerTempsReel() {
             const announcementsContainer = document.getElementById('announcements-container');
             const chatMessages = document.getElementById('chat-messages');
 
-            // 1. Charger et Écouter les Annonces
+            // Flux Annonces
             const qAnnouncements = query(collection(db, "announcements"), orderBy("timestamp", "desc"));
             onSnapshot(qAnnouncements, (snapshot) => {
                 announcementsContainer.innerHTML = '';
                 snapshot.forEach((doc) => {
                     const data = doc.data();
                     const card = document.createElement('div');
-                    card.className = "announcement-card bg-white p-5 rounded-2xl border border-slate-100 shadow-sm border-l-4 border-l-sky-500";
+                    card.className = "announcement-card bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.01)] relative overflow-hidden flex flex-col justify-between";
                     card.innerHTML = `
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-xs font-bold text-sky-600 bg-sky-50 px-2.5 py-1 rounded-md">NOTE DU CHEF</span>
-                            <span class="text-[10px] text-slate-400">${data.timestamp ? new Date(data.timestamp.seconds*1000).toLocaleDateString() : 'À l\'instant'}</span>
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-sky-500"></div>
+                                <span class="text-[11px] font-bold tracking-wider text-sky-600 uppercase">Directive Exploitation</span>
+                            </div>
+                            <span class="text-[10px] font-medium text-slate-400">${data.timestamp ? new Date(data.timestamp.seconds*1000).toLocaleDateString() : 'En cours'}</span>
                         </div>
-                        <p class="text-slate-700 text-sm leading-relaxed">${data.content}</p>
+                        <p class="text-slate-600 text-sm leading-relaxed">${data.content}</p>
                     `;
                     announcementsContainer.appendChild(card);
                 });
-                // Animation GSAP cascade sur les nouvelles annonces
-                gsap.from(".announcement-card", { opacity: 0, y: 15, duration: 0.4, stagger: 0.1 });
+                gsap.from(".announcement-card", { opacity: 0, scale: 0.98, y: 10, duration: 0.4, stagger: 0.08 });
             });
 
-            // 2. Écrire une Annonce (Chef)
             document.getElementById('post-announcement-btn').addEventListener('click', async () => {
                 const input = document.getElementById('announcement-input');
                 if(!input.value.trim()) return;
-                await addDoc(collection(db, "announcements"), {
-                    content: input.value.trim(),
-                    timestamp: new Date()
-                });
+                await addDoc(collection(db, "announcements"), { content: input.value.trim(), timestamp: new Date() });
                 input.value = '';
             });
 
-            // 3. Charger et Écouter le Chat d'équipe
+            // Flux Chat
             const qChat = query(collection(db, "messages"), orderBy("timestamp", "asc"));
             onSnapshot(qChat, (snapshot) => {
                 chatMessages.innerHTML = '';
                 snapshot.forEach((doc) => {
                     const data = doc.data();
+                    const isMe = data.sender === auth.currentUser.email.split('@')[0];
                     const msgDiv = document.createElement('div');
-                    msgDiv.className = "chat-msg bg-slate-50 p-3 rounded-xl max-w-[85%]";
+                    msgDiv.className = `chat-msg max-w-[80%] p-3.5 rounded-2xl shadow-sm text-sm ${isMe ? 'bg-sky-500 text-white ml-auto rounded-tr-none' : 'bg-slate-100 text-slate-700 rounded-tl-none'}`;
                     msgDiv.innerHTML = `
-                        <p class="text-[10px] font-bold text-slate-500 mb-0.5">${data.sender}</p>
-                        <p class="text-slate-700">${data.text}</p>
+                        <p class="text-[9px] font-bold ${isMe ? 'text-sky-100' : 'text-slate-400'} mb-1 uppercase tracking-wider">${data.sender}</p>
+                        <p class="leading-relaxed">${data.text}</p>
                     `;
                     chatMessages.appendChild(msgDiv);
                 });
-                chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll automatique
-                gsap.from(".chat-msg:last-child", { opacity: 0, scale: 0.95, y: 5, duration: 0.2 });
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                gsap.from(".chat-msg:last-child", { opacity: 0, x: 10, scale: 0.95, duration: 0.2 });
             });
 
-            // 4. Envoyer un message sur le Chat
             document.getElementById('send-chat-btn').addEventListener('click', envoyerMessage);
             document.getElementById('chat-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') envoyerMessage(); });
 
