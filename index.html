@@ -2,30 +2,44 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>RTE Hub</title>
-    <!-- Tailwind CSS pour le design -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTE Hub | Connexion</title>
+    <!-- Tailwind CSS pour le look moderne bleu/blanc -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- GSAP pour les animations -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 </head>
-<body class="bg-blue-50">
+<body class="bg-blue-50 h-screen flex justify-center items-center">
 
-    <div id="app">
-        <!-- Ton contenu ira ici -->
-        <h1 class="text-sky-700 text-center mt-10 text-3xl font-bold">RTE HUB</h1>
+    <!-- Ta zone de login -->
+    <div id="login-card" class="bg-white p-10 rounded-3xl shadow-2xl w-96 border border-sky-100">
+        <h1 class="text-sky-600 text-2xl font-bold mb-6 text-center">RTE HUB</h1>
+        <input id="email-input" type="email" placeholder="Email professionnel" class="w-full p-3 mb-4 border border-sky-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400">
+        <button id="login-btn" class="w-full bg-sky-500 text-white py-3 rounded-xl font-bold hover:bg-sky-600 transition">
+            Se connecter
+        </button>
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        // Ajoute ici tes autres imports Firebase (auth, firestore...)
-        
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
         const firebaseConfig = {
-            // Ton code ici
+            apiKey: "AIzaSyCFqbtCLxYcRDJ-4KvJBBGZ8lIbhE-dXds",
+            authDomain: "rte-hub.firebaseapp.com",
+            projectId: "rte-hub",
+            storageBucket: "rte-hub.firebasestorage.app",
+            messagingSenderId: "147630574938",
+            appId: "1:147630574938:web:457679b08b18be8e93b763"
         };
+
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Animation GSAP au chargement
+        gsap.from("#login-card", { opacity: 0, y: 50, duration: 1, ease: "power2.out" });
+
+        console.log("Firebase connecté, prêt pour la suite !");
     </script>
-    
-    <script src="script.js"></script>
 </body>
 </html>
